@@ -32,7 +32,7 @@ export default function Resources() {
     },
     {
       name: 'Action Fraud (UK)',
-      description: 'The UK's national reporting centre for fraud and cybercrime.',
+      description: "The UK's national reporting centre for fraud and cybercrime.",
       url: 'https://www.actionfraud.police.uk',
       badge: 'UK',
     },
