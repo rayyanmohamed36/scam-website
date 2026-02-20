@@ -39,6 +39,33 @@ app.use('/api/contact', require('./routes/contact'));
 // ── Health check ──
 app.get('/api/health', (_, res) => res.json({ status: 'ok' }));
 
+// ── Debug route (remove after fixing) ──
+app.get('/api/debug', async (_, res) => {
+  try {
+    const mongoose = require('mongoose');
+    const state = mongoose.connection.readyState;
+    // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    const stateMap = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+    
+    const Story = require('./models/Story');
+    const count = await Story.countDocuments();
+    
+    res.json({
+      dbState: stateMap[state] || state,
+      storyCount: count,
+      envCheck: {
+        hasMongo: !!process.env.MONGO_URI,
+        hasFirebaseProject: !!process.env.FIREBASE_PROJECT_ID,
+        hasFirebaseEmail: !!process.env.FIREBASE_CLIENT_EMAIL,
+        hasFirebaseKey: !!process.env.FIREBASE_PRIVATE_KEY,
+        clientUrl: process.env.CLIENT_URL || 'NOT SET',
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message, stack: error.stack });
+  }
+});
+
 // ── Global error handler ──
 app.use((err, _req, res, _next) => {
   console.error(err.stack);
