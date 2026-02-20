@@ -4,9 +4,6 @@ const cors = require('cors');
 const helmet = require('helmet');
 const connectDB = require('./config/db');
 
-// ── Connect to MongoDB ──
-connectDB();
-
 const app = express();
 
 // ── Global Middleware ──
@@ -23,6 +20,16 @@ app.use(
   })
 );
 app.use(express.json({ limit: '1mb' }));
+
+// ── Ensure DB is connected before handling requests ──
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (error) {
+    res.status(500).json({ error: 'Database connection failed' });
+  }
+});
 
 // ── Routes ──
 app.use('/api/share-story', require('./routes/stories'));
